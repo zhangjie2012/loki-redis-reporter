@@ -1,0 +1,7 @@
+* redis loki reporter
+
+A [[https://grafana.com/oss/loki/][grafana loki]] reporter for redis list.
+
+first, use [[https://github.com/zhangjie2012/logrusredis][logrusredis]] write structure log to redis list, then use this agent pop data rewrite to loki store.
+
+/just worked for personal, now/
