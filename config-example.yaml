@@ -1,0 +1,9 @@
+redis:
+  host: "localhost:6379"
+  password: ""
+  db: 0
+  keys:
+    - "logs_west"
+    - "logs_east"
+loki:
+  server: "http://localhost:3100"
