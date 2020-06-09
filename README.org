@@ -7,3 +7,23 @@ first, use [[https://github.com/zhangjie2012/logrusredis][logrusredis]] write st
 data structure standard: https://github.com/zhangjie2012/logrusredis/blob/master/logrusredis.go#L49
 
 /just worked for personal, now/
+
+** Build
+
+#+begin_src
+go build -o lrreporter *.go
+#+end_src
+
+** Config
+
+#+begin_src
+redis:
+  host: "localhost:6379"
+  password: ""
+  db: 0
+  keys:
+    - "logs_west"
+    - "logs_east"
+loki:
+  server: "http://localhost:3100"
+#+end_src
