@@ -50,8 +50,6 @@ func getConfig(config string) (*Config, error) {
 }
 
 func consumeAndReport(ctx context.Context, wg *sync.WaitGroup, c *redis.Client, key string) {
-	defer fmt.Printf("finish %s", key)
-
 	defer wg.Done()
 
 	blockInit := 10 * time.Millisecond
@@ -223,5 +221,4 @@ func main() {
 	}()
 
 	wg.Wait()
-	fmt.Println("finish")
 }
