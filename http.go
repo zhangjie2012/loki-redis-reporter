@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -13,16 +16,16 @@ func httpGetStatusCode(url string) (int, error) {
 }
 
 func httpPost(url string, bs []byte) error {
-	// resp, err := http.Post(url, "application/json", bytes.NewBuffer(bs))
-	// if err != nil {
-	// 	return err
-	// }
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(bs))
+	if err != nil {
+		return err
+	}
 
-	// if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-	// 	defer resp.Body.Close()
-	// 	body, _ := ioutil.ReadAll(resp.Body)
-	// 	return fmt.Errorf("code = %s, body = %s, ", resp.Status, string(body))
-	// }
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("code = %s, body = %s, ", resp.Status, string(body))
+	}
 
 	return nil
 }
