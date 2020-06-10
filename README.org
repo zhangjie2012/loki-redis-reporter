@@ -27,3 +27,9 @@ redis:
 loki:
   server: "http://localhost:3100"
 #+end_src
+
+** Performance
+
+loki-redis-reporter exporter prometheus metrics in =:6666/metrics=.
+
+I found loki http push very slowly.

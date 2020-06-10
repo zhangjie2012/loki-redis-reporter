@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/zhangjie2012/logrusredis"
 	"gopkg.in/yaml.v2"
@@ -52,10 +54,7 @@ func getConfig(config string) (*Config, error) {
 func consumeAndReport(ctx context.Context, wg *sync.WaitGroup, c *redis.Client, key string) {
 	defer wg.Done()
 
-	blockInit := 10 * time.Millisecond
-	blockMax := 10 * time.Second
-	stepRate := 2
-	blockD := blockInit
+	blockD := 100 * time.Millisecond
 
 newLoop:
 	for {
@@ -72,10 +71,7 @@ newLoop:
 
 			if len(bs) == 0 {
 				time.Sleep(blockD)
-				blockD *= time.Duration(stepRate)
-				if blockD > blockMax {
-					blockD = blockInit
-				}
+				promIdleCountInc()
 				goto newLoop
 			}
 
@@ -83,6 +79,7 @@ newLoop:
 			if err := json.Unmarshal(bs, &logS); err != nil {
 				// must be dirty data, just throw it
 				log.Printf("data unmarshal failure, key=%s, err=%s", key, err)
+				promDirtyCountInc()
 				goto newLoop
 			}
 
@@ -94,8 +91,7 @@ newLoop:
 				return // !!!!
 			}
 
-			// todo: success stat -> promethues
-			blockD = blockInit
+			promSuccCountInc(key)
 		}
 	}
 }
@@ -149,7 +145,7 @@ func reportLoki(logS *logrusredis.LogS) error {
 			if err == nil {
 				r.Streams[0].Stream[key] = string(bs)
 			} else {
-				// todo add promethues state
+				promWrongMetaDataInc()
 			}
 		}
 	}
@@ -209,6 +205,14 @@ func main() {
 		wg.Add(1)
 		go consumeAndReport(ctx, &wg, rClient, key)
 	}
+
+	// Expose the registered metrics via HTTP.
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Fatal(http.ListenAndServe(":6666", nil))
+	}()
+
+	go printConsumeStat()
 
 	go func() {
 		quit := make(chan os.Signal, 1)
