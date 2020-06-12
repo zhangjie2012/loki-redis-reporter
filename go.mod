@@ -8,8 +8,8 @@ require (
 	github.com/prometheus/common v0.10.0 // indirect
 	github.com/prometheus/procfs v0.1.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
-	github.com/zhangjie2012/logrusredis v0.0.0-20200610041341-1a437d7f93aa
-	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
+	github.com/zhangjie2012/logrusredis v0.0.0-20200612034223-e6c8caf58965
+	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	google.golang.org/protobuf v1.24.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
