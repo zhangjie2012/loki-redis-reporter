@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-redis/redis"
+	redis "github.com/go-redis/redis/v7"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/zhangjie2012/logrusredis"
@@ -54,7 +54,7 @@ func getConfig(config string) (*Config, error) {
 func consumeAndReport(ctx context.Context, wg *sync.WaitGroup, c *redis.Client, key string) {
 	defer wg.Done()
 
-	blockD := 100 * time.Millisecond
+	blockD := 1 * time.Second
 
 newLoop:
 	for {
@@ -63,18 +63,17 @@ newLoop:
 			log.Printf("receive done => %s", key)
 			return
 		default:
-			bs, err := c.RPop(key).Bytes()
+			result, err := c.BRPop(blockD, key).Result()
 			if err != nil && err != redis.Nil {
-				log.Printf("redis rpop failure, close this routine, key=%s, err=%s", key, err)
+				log.Printf("redis brpop failure, close this routine, key=%s, err=%s", key, err)
 				return // !!!!
 			}
-
-			if len(bs) == 0 {
-				time.Sleep(blockD)
+			if len(result) != 2 {
 				promIdleCountInc()
 				goto newLoop
 			}
 
+			bs := []byte(result[1]) // listName := result[0]
 			logS := logrusredis.LogS{}
 			if err := json.Unmarshal(bs, &logS); err != nil {
 				// must be dirty data, just throw it

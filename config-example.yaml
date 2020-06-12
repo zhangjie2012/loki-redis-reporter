@@ -3,7 +3,7 @@ redis:
   password: ""
   db: 0
   keys:
-    - "logs_west"
-    - "logs_east"
+    - "logs:west"
+    - "logs:east"
 loki:
   server: "http://localhost:3100"
